@@ -1,7 +1,7 @@
 package com.hannesdorfmann.sqlbritedao.sample.model;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabase;
 import com.hannesdorfmann.sqlbrite.dao.Dao;
 import com.hannesdorfmann.sqlbritedao.sample.model.customer.Customer;
 import com.hannesdorfmann.sqlbritedao.sample.model.customer.CustomerMapper;

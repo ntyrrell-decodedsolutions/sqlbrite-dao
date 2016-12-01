@@ -2,10 +2,12 @@ package com.hannesdorfmann.sqlbrite.dao;
 
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.database.DatabaseErrorHandler;
-import android.database.DefaultDatabaseErrorHandler;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+
+import net.sqlcipher.DatabaseErrorHandler;
+import net.sqlcipher.DefaultDatabaseErrorHandler;
+import net.sqlcipher.database.SQLiteDatabase;
+import net.sqlcipher.database.SQLiteDatabaseHook;
+import net.sqlcipher.database.SQLiteOpenHelper;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import com.squareup.sqlbrite.BriteDatabase;
@@ -60,14 +62,8 @@ public class DaoManager {
     this.upgradedListener = builder.upgradedListener;
     this.daos = builder.daos;
 
-    OpenHelper openHelper;
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-      openHelper = new OpenHelper(builder.context, name, builder.cursorFactory, version,
-          builder.errorHandler, builder.foreignKeyConstraints);
-    } else {
-      openHelper = new OpenHelperApi16(builder.context, name, builder.cursorFactory, version,
-          builder.errorHandler, builder.foreignKeyConstraints);
-    }
+    OpenHelper openHelper = new OpenHelper(builder.context, name, builder.cursorFactory, version,
+          builder.databaseHook, builder.errorHandler, builder.foreignKeyConstraints);
 
     SqlBrite brite;
     if (builder.logger != null) {
@@ -76,7 +72,8 @@ public class DaoManager {
       brite = SqlBrite.create();
     }
 
-    db = brite.wrapDatabaseHelper(openHelper,
+    String password = "password";
+    db = brite.wrapDatabaseHelper(builder.context, openHelper, password,
         builder.scheduler == null ? Schedulers.io() : builder.scheduler);
     db.setLoggingEnabled(builder.logging);
 
@@ -142,8 +139,8 @@ public class DaoManager {
     protected boolean foreignKeyConstraints;
 
     public OpenHelper(Context context, String name, SQLiteDatabase.CursorFactory factory,
-        int version, DatabaseErrorHandler errorHandler, boolean foreignKeyConstraints) {
-      super(context, name, factory, version, errorHandler);
+                      int version, SQLiteDatabaseHook databaseHook, DatabaseErrorHandler errorHandler, boolean foreignKeyConstraints) {
+      super(context, name, factory, version, databaseHook, errorHandler);
       this.foreignKeyConstraints = foreignKeyConstraints;
     }
 
@@ -154,10 +151,6 @@ public class DaoManager {
           db.execSQL("PRAGMA foreign_keys=ON;");
         }
       }
-    }
-
-    @Override public void onConfigure(SQLiteDatabase db) {
-      super.onConfigure(db);
     }
 
     @Override public void onCreate(SQLiteDatabase db) {
@@ -181,20 +174,6 @@ public class DaoManager {
     }
   }
 
-  @TargetApi(Build.VERSION_CODES.JELLY_BEAN) private class OpenHelperApi16 extends OpenHelper {
-    public OpenHelperApi16(Context context, String name, SQLiteDatabase.CursorFactory factory,
-        int version, DatabaseErrorHandler errorHandler, boolean foreignKeyConstraints) {
-      super(context, name, factory, version, errorHandler, foreignKeyConstraints);
-    }
-
-    @Override public void onConfigure(SQLiteDatabase db) {
-      super.onConfigure(db);
-      if (foreignKeyConstraints) {
-        db.setForeignKeyConstraintsEnabled(true);
-      }
-    }
-  }
-
   /**
    * The Builder to configure and instantiate a {@link DaoManager}.
    */
@@ -205,6 +184,7 @@ public class DaoManager {
     private final Context context;
     private SQLiteDatabase.CursorFactory cursorFactory = null;
     private DatabaseErrorHandler errorHandler = new DefaultDatabaseErrorHandler();
+    private SQLiteDatabaseHook databaseHook = null;
     private TablesCreatedListener createdListener = null;
     private TablesUpgradedListener upgradedListener = null;
     private boolean logging = false;
@@ -251,6 +231,17 @@ public class DaoManager {
      */
     public Builder errorHandler(DatabaseErrorHandler errorHandler) {
       this.errorHandler = errorHandler;
+      return this;
+    }
+
+    /**
+     * set the {@link SQLiteDatabaseHook}
+     *
+     * @param databaseHook the databasehook
+     * @return the builder itself
+       */
+    public Builder databaseHook(SQLiteDatabaseHook databaseHook) {
+      this.databaseHook = databaseHook;
       return this;
     }
 

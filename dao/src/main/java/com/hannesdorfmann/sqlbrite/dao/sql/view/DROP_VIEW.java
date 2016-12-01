@@ -1,7 +1,7 @@
 package com.hannesdorfmann.sqlbrite.dao.sql.view;
 
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
+import net.sqlcipher.SQLException;
+import net.sqlcipher.database.SQLiteDatabase;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlExecuteCompileable;
 import com.hannesdorfmann.sqlbrite.dao.sql.SqlRootNode;
 

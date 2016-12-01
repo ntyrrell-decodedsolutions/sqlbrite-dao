@@ -1,7 +1,7 @@
 package com.hannesdorfmann.sqlbrite.dao.sql;
 
-import android.database.SQLException;
-import android.database.sqlite.SQLiteDatabase;
+import net.sqlcipher.SQLException;
+import net.sqlcipher.database.SQLiteDatabase;
 
 /**
  * Makes the sql statment be executed by {@link SQLiteDatabase#execSQL(String)}.

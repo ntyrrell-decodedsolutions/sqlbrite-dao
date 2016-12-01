@@ -1,6 +1,5 @@
 package com.hannesdorfmann.sqlbrite.dao;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 
 import net.sqlcipher.DatabaseErrorHandler;

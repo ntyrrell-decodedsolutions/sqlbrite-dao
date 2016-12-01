@@ -61,6 +61,7 @@ public class DaoManager {
     this.createdListener = builder.createdListener;
     this.upgradedListener = builder.upgradedListener;
     this.daos = builder.daos;
+    String password = builder.password;
 
     OpenHelper openHelper = new OpenHelper(builder.context, name, builder.cursorFactory, version,
           builder.databaseHook, builder.errorHandler, builder.foreignKeyConstraints);
@@ -72,7 +73,6 @@ public class DaoManager {
       brite = SqlBrite.create();
     }
 
-    String password = "password";
     db = brite.wrapDatabaseHelper(builder.context, openHelper, password,
         builder.scheduler == null ? Schedulers.io() : builder.scheduler);
     db.setLoggingEnabled(builder.logging);
@@ -191,6 +191,7 @@ public class DaoManager {
     private SqlBrite.Logger logger = null;
     private Scheduler scheduler = null;
     private boolean foreignKeyConstraints = false;
+    private String password = null;
 
     private Builder(Context context) {
       this.context = context.getApplicationContext();
@@ -344,6 +345,11 @@ public class DaoManager {
      */
     public Builder foreignKeyConstraints(boolean enabled) {
       this.foreignKeyConstraints = enabled;
+      return this;
+    }
+
+    public Builder password(String password) {
+      this.password = password;
       return this;
     }
 

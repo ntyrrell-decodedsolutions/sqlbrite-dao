@@ -37,6 +37,7 @@ public class DaoManager {
   private BriteDatabase db;
   private TablesCreatedListener createdListener;
   private TablesUpgradedListener upgradedListener;
+  private String password;
 
   private DaoManager(Builder builder) {
 
@@ -60,7 +61,7 @@ public class DaoManager {
     this.createdListener = builder.createdListener;
     this.upgradedListener = builder.upgradedListener;
     this.daos = builder.daos;
-    String password = builder.password;
+    this.password = builder.password;
 
     OpenHelper openHelper = new OpenHelper(builder.context, name, builder.cursorFactory, version,
           builder.databaseHook, builder.errorHandler, builder.foreignKeyConstraints);
@@ -109,6 +110,16 @@ public class DaoManager {
    */
   public void delete(Context c) {
     c.deleteDatabase(getName());
+  }
+
+  /**
+   * Changes the SQLCipher key for the database encryption
+   * @param key new key value
+     */
+  public void changeKey(String key) {
+    db.execute("PRAGMA key = '" + password + "';");
+    this.password = key;
+    db.execute("PRAGMA rekey = '" + key + "';");
   }
 
   /**
